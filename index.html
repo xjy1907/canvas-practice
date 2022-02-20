@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>canvas</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <script>
+      var canvas = document.getElementById("canvas");
+
+      canvas.width = document.documentElement.clientWidth;
+      canvas.height = document.documentElement.clientHeight;
+
+      let ctx = canvas.getContext("2d");
+      let painting = false;
+      ctx.fillStyle = "black";
+      ctx.strokeStyle = "none";
+      //画笔粗度
+      ctx.lineWidth = 10;
+      // 让线的连接处更加圆滑
+      ctx.lineCap = "round";
+      let last = null;
+
+      // 把画直线做成一个函数，传入的参数
+      // 分别是 起始的x,y值,和你要画到哪个x,y值为止
+      function drawLine(x1, y1, x2, y2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+
+      // 检测目前有没有touch的方法,就知道目前是不是手机端了
+      let isTouchDevice = "ontouchstart" in document.documentElement;
+
+      // 如果是手机 pad 端,
+      if (isTouchDevice) {
+        canvas.ontouchstart = (e) => {
+          let x = e.touches[0].clientX;
+          let y = e.touches[0].clientY;
+          last = [x, y];
+        };
+        canvas.ontouchmove = (e) => {
+          let x = e.touches[0].clientX;
+          let y = e.touches[0].clientY;
+          drawLine(last[0], last[1], x, y);
+          last = [x, y];
+        };
+      }
+      // 如果是pc端
+      else {
+        canvas.onmousedown = (e) => {
+          // 在按下以后将标志位设置成true
+
+          painting = true;
+          // 记录按下时的位置
+          last = [e.clientX, e.clientY];
+        };
+        canvas.onmousemove = (e) => {
+          // 如果标志位为true,也就是按下了
+          if (painting === true) {
+            // 调用画线函数,以按下时的xy为起点,画到目前鼠标所在的位置
+            drawLine(last[0], last[1], e.clientX, e.clientY);
+
+            console.log("我移动了，我按下了");
+            // 将这次终点的位置,设置为下次起点的位置
+            last = [e.clientX, e.clientY];
+          } else {
+            console.log("我移动了 但我没按下");
+          }
+        };
+        canvas.onmouseup = (e) => {
+          // 如果鼠标抬起,将标志位设回false
+          painting = false;
+        };
+      }
+    </script>
+  </body>
+</html>
